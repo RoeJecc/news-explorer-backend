@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const { celebrate, Joi } = require("celebrate");
-const validator = require("validator");
-const { validateURL } = require("../middleware/urlValidator");
+const validateUrl = require("../middleware/urlValidator");
 const {
   getArticles,
   createArticle,
@@ -19,8 +18,8 @@ router.post(
       text: Joi.string().required(),
       date: Joi.string().required(),
       source: Joi.string().required(),
-      link: Joi.string().required().custom(validateURL),
-      image: Joi.string().required().custom(validateURL),
+      link: Joi.string().required().custom(validateUrl),
+      image: Joi.string().required().custom(validateUrl),
     }),
   }),
   createArticle
