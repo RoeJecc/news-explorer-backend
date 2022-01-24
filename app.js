@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
 const cors = require("cors");
-const { errors } = require("celebrate");
+const { celebrate, Joi, errors } = require("celebrate");
 const { login, createUser } = require("./controllers/users");
 const auth = require("./middleware/auth");
 require("dotenv").config();
@@ -16,7 +16,7 @@ const app = express();
 app.use(cors());
 app.options("*", cors());
 
-const { PORT = 3000, NODE_ENV } = process.env;
+const { PORT = 3000 } = process.env;
 
 mongoose.connect("mongodb://localhost:27017/news-explorer");
 
@@ -25,9 +25,29 @@ app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(errorLogger);
-app.post("/signin", login);
+app.use(errors());
+app.post(
+  "/signin",
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+    }),
+  }),
+  login
+);
 
-app.post("/signup", createUser);
+app.post(
+  "/signup",
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+      name: Joi.string().required(),
+    }),
+  }),
+  createUser
+);
 
 app.use(auth);
 app.use("/users", userRouter);
