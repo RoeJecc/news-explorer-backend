@@ -1,19 +1,21 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
-const NotFoundError = require("../errors/not-found-error");
-const AuthorizationError = require("../errors/authorization-error");
-const ConflictError = require("../errors/conflict-error");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const dotenv = require('dotenv');
+const NotFoundError = require('../errors/not-found-error');
+const AuthorizationError = require('../errors/authorization-error');
+const ConflictError = require('../errors/conflict-error');
 
+dotenv.config();
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-module.exports.createUser = (req, res, next) => {
+module.exports.createUser = async (req, res, next) => {
   const { name, email, password } = req.body;
 
   User.findOne({ email })
     .then((userExists) => {
       if (userExists) {
-        throw new ConflictError("User already exists.");
+        throw new ConflictError('User already exists.');
       }
 
       bcrypt
@@ -23,22 +25,15 @@ module.exports.createUser = (req, res, next) => {
             name,
             email,
             password: hash,
-          })
-        )
+        }))
         .then((user) =>
-          res.send({
-            _id: user._id,
-            email: user.email,
-          })
-        );
+          res.status(201).send({
+          _id: user._id,
+          email: user.email,
+        }))
+        .catch(next)
     })
-    .catch((err) => {
-      if (err.name === "MongoError" && err.code === 11000) {
-        throw new ConflictError("User already exists.");
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 module.exports.login = (req, res, next) => {
@@ -47,11 +42,11 @@ module.exports.login = (req, res, next) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       if (!user) {
-        throw new AuthorizationError("Not Authorized");
+        throw new AuthorizationError('Not Authorized');
       }
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === "production" ? JWT_SECRET : "super-secret-key"
+        NODE_ENV === 'production' ? JWT_SECRET : 'super-secret-key',
       );
       res.send({ token });
     })
@@ -61,9 +56,9 @@ module.exports.login = (req, res, next) => {
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id).then((user) => {
     if (!user) {
-      throw new NotFoundError("User not found.");
+      throw new NotFoundError('User not found.');
     } else {
-      return res.status(200).send({ user })
+      return res.status(200).send({ user });
     }
-  })
+  });
 };
