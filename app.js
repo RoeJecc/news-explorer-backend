@@ -2,13 +2,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const cors = require('cors');
-const { celebrate, Joi, errors } = require('celebrate');
+const { errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middleware/auth');
 require('dotenv').config();
 const userRouter = require('./routes/users');
 const articlesRouter = require('./routes/articles');
 const { requestLogger, errorLogger } = require('./middleware/logger');
+const { limiter } = require('./middleware/limiter');
 const NotFoundError = require('./errors/not-found-error');
 
 const app = express();
@@ -26,7 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(errorLogger);
 app.use(errors());
-
+app.use(limiter);
 app.post(
   '/signin',
   login,

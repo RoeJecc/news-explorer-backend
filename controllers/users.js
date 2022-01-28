@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
 const dotenv = require('dotenv');
+const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-error');
 const AuthorizationError = require('../errors/authorization-error');
 const ConflictError = require('../errors/conflict-error');
@@ -20,18 +20,16 @@ module.exports.createUser = async (req, res, next) => {
 
       bcrypt
         .hash(password, 10)
-        .then((hash) =>
-          User.create({
-            name,
-            email,
-            password: hash,
+        .then((hash) => User.create({
+          name,
+          email,
+          password: hash,
         }))
-        .then((user) =>
-          res.status(201).send({
+        .then((user) => res.status(201).send({
           _id: user._id,
           email: user.email,
         }))
-        .catch(next)
+        .catch(next);
     })
     .catch(next);
 };
@@ -58,7 +56,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     if (!user) {
       throw new NotFoundError('User not found.');
     } else {
-      return res.status(200).send({ user });
+      return res.status(200).send({ user: { _id: user._id, email: user.email, name: user.name } });
     }
   });
 };
