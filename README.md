@@ -13,7 +13,3 @@ Meanwhile, I make use of development techniques such as implementing responsive 
 
 Author:
 Joe Recchia
-
-This Project is hosted at: 
-
-https://jrecc-news.students.nomoreparties.sbs/
